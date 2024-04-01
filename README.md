@@ -36,3 +36,13 @@ npm run build
 You can preview the production build with `npm run preview`.
 
 > To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
+
+## TMDB Test data
+
+This project uses test data obtained from the Relevant Search book repository (https://github.com/o19s/relevant-search-book). This was in turn sourced from TMDB.
+
+The data has been coerced into a format suitable for bulk import using the following command:
+
+```
+cat tmdb.json | jq 'to_entries[] | { "_id": .key, "_source": .value }' > ./localenv/dump-data/tmdb-dump.json
+```
