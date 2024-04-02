@@ -16,15 +16,24 @@
 		Searched
 	}
 
+	const keyify = (obj: Object, prefix: string = ''): string[] =>
+		Object.keys(obj).reduce((acc: string[], el: string) => {
+			if (Array.isArray(obj[el])) {
+				return acc;
+			} else if (typeof obj[el] === 'object' && obj[el] !== null) {
+				return [...acc, ...keyify(obj[el], prefix + el + '.')];
+			}
+			return [...acc, prefix + el];
+		}, []);
+
 	const columnHelper = createColumnHelper();
 
 	export let form = null;
 	$: data = form?.hits.hits;
-	$: columns = [
-		columnHelper.accessor('_source.title', {}),
-		columnHelper.accessor('_source.overview', {}),
-		columnHelper.accessor('_score', {})
-	];
+	$: columns =
+		data !== undefined
+			? keyify(data[0]).map((key: string) => columnHelper.accessor(key, {}))
+			: undefined;
 	$: options = writable<TableOptions<Any>>({
 		data: data,
 		columns: columns,
