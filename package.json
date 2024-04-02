@@ -38,6 +38,7 @@
 	},
 	"type": "module",
 	"dependencies": {
-		"@elastic/elasticsearch": "^7.17.13"
+		"@elastic/elasticsearch": "^7.17.13",
+		"@tanstack/svelte-table": "^8.15.3"
 	}
 }

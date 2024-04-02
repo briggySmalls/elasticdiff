@@ -18,8 +18,6 @@ export const actions = {
     const esResponse = await client.search(clientPayload);
     console.log(`Response with status code ${esResponse.statusCode}!`)
 
-    // return JSON.stringify(esResponse)
-    // return { success: true };
     return esResponse.body;
   }
 };
