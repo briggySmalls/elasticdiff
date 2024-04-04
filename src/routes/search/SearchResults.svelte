@@ -1,16 +1,19 @@
 <script lang="ts">
-	import { writable } from 'svelte/store';
+	import { onDestroy, onMount } from 'svelte';
+
 	import { Accordion, AccordionItem } from '@skeletonlabs/skeleton';
-	import {
-		createSvelteTable,
-		createColumnHelper,
-		getCoreRowModel,
-		flexRender
-	} from '@tanstack/svelte-table';
-	import type { TableOptions } from '@tanstack/svelte-table';
+
+	import 'ag-grid-community/styles/ag-grid.css';
+	import 'ag-grid-community/styles/ag-theme-quartz.css';
+
+	import { createGrid, GridApi } from 'ag-grid-community';
 
 	// Reponse from ElasticSearch
 	export let response;
+
+	// Variables to be allocated
+	let domNode: HTMLDivElement;
+	let gridApi: GridApi;
 
 	const keyify = (obj: Object, prefix: string = ''): string[] =>
 		Object.keys(obj).reduce((acc: string[], el: string) => {
@@ -22,16 +25,35 @@
 			return [...acc, prefix + el];
 		}, []);
 
-	const columnHelper = createColumnHelper();
+	const toggleColumnVisibilityHandler = () => {
+		gridApi.columns;
+	};
 
-	$: data = response.hits.hits;
-	$: columns = keyify(data[0]).map((key: string) => columnHelper.accessor(key, {}));
-	$: options = writable<TableOptions<Any>>({
-		data: data,
-		columns: columns,
-		getCoreRowModel: getCoreRowModel()
+	// Grid definition
+	const data = response.hits.hits;
+	const columns = keyify(data[0]).map((key: string) => ({
+		field: key
+	}));
+	const gridOptions = {
+		defaultColDef: {
+			flex: 1,
+			minWidth: 150,
+			filter: true,
+			resizable: true,
+			sortable: true
+		},
+		columnDefs: columns,
+		rowData: data
+	};
+	onMount(() => {
+		gridApi = createGrid(domNode, gridOptions);
 	});
-	$: table = createSvelteTable(options);
+
+	onDestroy(() => {
+		if (gridApi) {
+			gridApi.destroy();
+		}
+	});
 </script>
 
 <Accordion>
@@ -40,63 +62,26 @@
 		<svelte:fragment slot="summary">Column visibility</svelte:fragment>
 		<svelte:fragment slot="content">
 			<div>
-				{#each $table.getAllColumns() as column}
+				{#each gridApi.getAllGridColumns() as column}
 					<label class="label flex items-center space-x-2">
 						<input
 							class="checkbox"
 							type="checkbox"
-							checked={column.getIsVisible()}
-							on:change={column.getToggleVisibilityHandler()}
+							checked={column.isVisible()}
+							on:change={(e) => {
+								gridApi.setColumnsVisible([column], !column.isVisible())
+							}}
 						/>
-						<p>{column.id}</p>
+						<p>{column.getColId()}</p>
 					</label>
 				{/each}
 			</div>
 		</svelte:fragment>
 	</AccordionItem>
 </Accordion>
-<div class="table-container">
-	<table class="table table-hover">
-		<thead>
-			{#each $table.getHeaderGroups() as headerGroup}
-				<tr>
-					{#each headerGroup.headers as header}
-						<th>
-							{#if !header.isPlaceholder}
-								<svelte:component
-									this={flexRender(header.column.columnDef.header, header.getContext())}
-								/>
-							{/if}
-						</th>
-					{/each}
-				</tr>
-			{/each}
-		</thead>
-		<tbody>
-			{#each $table.getRowModel().rows as row}
-				<tr>
-					{#each row.getVisibleCells() as cell}
-						<td>
-							<svelte:component this={flexRender(cell.column.columnDef.cell, cell.getContext())} />
-						</td>
-					{/each}
-				</tr>
-			{/each}
-		</tbody>
-		<tfoot>
-			{#each $table.getFooterGroups() as footerGroup}
-				<tr>
-					{#each footerGroup.headers as header}
-						<th>
-							{#if !header.isPlaceholder}
-								<svelte:component
-									this={flexRender(header.column.columnDef.footer, header.getContext())}
-								/>
-							{/if}
-						</th>
-					{/each}
-				</tr>
-			{/each}
-		</tfoot>
-	</table>
-</div>
+<div
+	id="datagrid"
+	class="table-container ag-theme-quartz-dark"
+	style="height: 500px"
+	bind:this={domNode}
+/>
