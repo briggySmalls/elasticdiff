@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { writable } from 'svelte/store';
+	import { Accordion, Checkbox } from '@svelteuidev/core';
 	import {
 		createSvelteTable,
 		createColumnHelper,
@@ -33,6 +34,18 @@
 	$: table = createSvelteTable(options);
 </script>
 
+<Accordion>
+	<Accordion.Item value="typescript">
+		<div slot="control">Column visibility</div>
+		{#each $table.getAllColumns() as column}
+			<Checkbox
+				label={column.id}
+				checked={column.getIsVisible()}
+				on:change={column.getToggleVisibilityHandler()}
+			/>
+		{/each}
+	</Accordion.Item>
+</Accordion>
 <table>
 	<thead>
 		{#each $table.getHeaderGroups() as headerGroup}
