@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import { TextInput, Textarea, Button, Loader, JsonInput } from '@svelteuidev/core';
 	import SearchResults from './SearchResults.svelte';
 
 	enum SearchState {
@@ -22,12 +21,13 @@
 		};
 	}}
 >
-	<TextInput name="indexName" placeholder="Index name" label="Index name" required />
-	<Textarea name="searchBody" placeholder="Search API body" label="Query" required />
-	<Button type="submit">
-		Search
-		{#if searchState == SearchState.Searching}
-			<Loader />
-		{/if}
-	</Button>
+	<label class="label">
+		<span>Index name</span>
+		<input name="indexName" class="input" type="text" placeholder="Index name" required />
+	</label>
+	<label class="label">
+		<span>Query</span>
+		<textarea name="searchBody" class="textarea" placeholder="Search API body" required />
+	</label>
+	<button class="btn variant-filled" type="submit">Search</button>
 </form>
