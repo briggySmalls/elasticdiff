@@ -7,6 +7,7 @@
 	import 'ag-grid-community/styles/ag-theme-quartz.css';
 
 	import { createGrid, GridApi } from 'ag-grid-community';
+	import type { ColumnVisibleEvent } from 'ag-grid-community';
 
 	// Reponse from ElasticSearch
 	export let response;
@@ -25,13 +26,10 @@
 			return [...acc, prefix + el];
 		}, []);
 
-	const toggleColumnVisibilityHandler = () => {
-		gridApi.columns;
-	};
-
 	// Grid definition
 	const data = response.hits.hits;
-	const columns = keyify(data[0]).map((key: string) => ({
+	const columnNames = keyify(data[0]);
+	const columns = columnNames.map((key: string) => ({
 		field: key
 	}));
 	const gridOptions = {
@@ -43,8 +41,14 @@
 			sortable: true
 		},
 		columnDefs: columns,
-		rowData: data
+		rowData: data,
+		onColumnVisible: columnVisibleHandler
 	};
+	let columnVisibilities = columnNames.reduce(
+		(acc, columnName) => ({ ...acc, [columnName]: true }),
+		{}
+	);
+
 	onMount(() => {
 		gridApi = createGrid(domNode, gridOptions);
 	});
@@ -54,6 +58,25 @@
 			gridApi.destroy();
 		}
 	});
+
+	const setAllGridColumnsVisibility = (visibility: boolean) => {
+		const allColumns = gridApi.getAllGridColumns();
+		gridApi.setColumnsVisible(allColumns, visibility);
+	};
+
+	function columnVisibleHandler(e: ColumnVisibleEvent) {
+		if (e.visible !== undefined) {
+			// Get the columns that were updated
+			const cols = [...(e.columns ? e.columns : []), ...(e.column ? [e.column] : [])];
+			// Update the svelte state
+			const columnNames = cols.map((c) => c.getColId());
+			columnVisibilities = columnNames.reduce(
+				(acc, columnName) => ({ ...acc, [columnName]: e.visible }),
+				columnVisibilities
+			);
+			console.log(`Visibilities updated\n${JSON.stringify(columnVisibilities)}`);
+		}
+	}
 </script>
 
 <Accordion>
@@ -62,14 +85,22 @@
 		<svelte:fragment slot="summary">Column visibility</svelte:fragment>
 		<svelte:fragment slot="content">
 			<div>
+				<div>
+					<button class="btn variant-filled" on:click={(e) => setAllGridColumnsVisibility(true)}
+						>Select all</button
+					>
+					<button class="btn variant-filled" on:click={(e) => setAllGridColumnsVisibility(false)}
+						>Deselect all</button
+					>
+				</div>
 				{#each gridApi.getAllGridColumns() as column}
 					<label class="label flex items-center space-x-2">
 						<input
 							class="checkbox"
 							type="checkbox"
-							checked={column.isVisible()}
+							bind:checked={columnVisibilities[column.getColId()]}
 							on:change={(e) => {
-								gridApi.setColumnsVisible([column], !column.isVisible())
+								gridApi.setColumnsVisible([column], e?.target?.checked);
 							}}
 						/>
 						<p>{column.getColId()}</p>
