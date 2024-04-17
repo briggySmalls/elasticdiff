@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import SearchResults from './SearchResults.svelte';
+	import { settings } from '$lib/settings';
+	import type { Settings } from '$lib/settings';
 
 	enum SearchState {
 		Initial = 1,
@@ -9,6 +11,11 @@
 	}
 
 	let searchState = SearchState.Initial;
+	let localSettings: Settings;
+
+	settings.subscribe((value: Settings) => {
+			localSettings = value;
+	});
 </script>
 
 <form
@@ -29,5 +36,6 @@
 		<span>Query</span>
 		<textarea name="searchBody" class="textarea" placeholder="Search API body" required />
 	</label>
+	<input type="hidden" name="elasticSearchUri" bind:value={localSettings.elasticSearchUri} />
 	<button class="btn variant-filled" type="submit">Search</button>
 </form>

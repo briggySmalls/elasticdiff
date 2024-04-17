@@ -7,7 +7,7 @@
 	import 'ag-grid-community/styles/ag-theme-quartz.css';
 
 	import { createGrid, GridApi } from 'ag-grid-community';
-	import type { ColumnVisibleEvent } from 'ag-grid-community';
+	import type { ColumnVisibleEvent, Column } from 'ag-grid-community';
 
 	// Reponse from ElasticSearch
 	export let response;
@@ -44,7 +44,7 @@
 		rowData: data,
 		onColumnVisible: columnVisibleHandler
 	};
-	let columnVisibilities = columnNames.reduce(
+	let columnVisibilities: Record<string, string> = columnNames.reduce(
 		(acc, columnName) => ({ ...acc, [columnName]: true }),
 		{}
 	);
@@ -77,6 +77,11 @@
 			console.log(`Visibilities updated\n${JSON.stringify(columnVisibilities)}`);
 		}
 	}
+
+	function columnVisibleUserUpdateHandler(e: Event, column: Column) {
+		const checkedStatus = (e.target as HTMLInputElement).checked
+		gridApi.setColumnsVisible([column], checkedStatus);
+	}
 </script>
 
 <Accordion>
@@ -93,15 +98,13 @@
 						>Deselect all</button
 					>
 				</div>
-				{#each gridApi.getAllGridColumns() as column}
+				{#each gridApi.getAllGridColumns() as column (column.getColId())}
 					<label class="label flex items-center space-x-2">
 						<input
 							class="checkbox"
 							type="checkbox"
 							bind:checked={columnVisibilities[column.getColId()]}
-							on:change={(e) => {
-								gridApi.setColumnsVisible([column], e?.target?.checked);
-							}}
+							on:change={(e) => columnVisibleUserUpdateHandler(e, column)}
 						/>
 						<p>{column.getColId()}</p>
 					</label>
