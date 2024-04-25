@@ -2,11 +2,15 @@
 	import SearchForm from './SearchForm.svelte';
 	import SearchResults from './SearchResults.svelte';
 
-	export let form = null;
+	export let searchResults: any | null = null;
+
+	function handleSearchResults(r: any) {
+		searchResults = r;
+	}
 </script>
 
-{#if !form}
-	<SearchForm />
+{#if searchResults === null}
+	<SearchForm {handleSearchResults} />
 {:else}
-	<SearchResults response={form} />
+	<SearchResults response={searchResults} />
 {/if}

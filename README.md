@@ -1,28 +1,33 @@
-# create-svelte
+# elasticdiff
 
-Everything you need to build a Svelte project, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/main/packages/create-svelte).
-
-## Creating a project
-
-If you're seeing this, you've probably already done this step. Congrats!
-
-```bash
-# create a new project in the current directory
-npm create svelte@latest
-
-# create a new project in my-app
-npm create svelte@latest my-app
-```
+GUI for debugging and developing ElasticSearch queries.
 
 ## Developing
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+The appliction can be distributed in two ways:
+
+1. A Sveltekit web application
+2. A tauri desktop application
+
+### Web application
+
+1. Ensure nodejs is installed (I use [asdf](https://asdf-vm.com/))
+1. Install dependencies with `npm install`
+1. Run the application with
 
 ```bash
 npm run dev
 
 # or start the server and open the app in a new browser tab
 npm run dev -- --open
+```
+
+### Desktop application
+
+1. Ensure Rust is installed (I use [asdf](https://asdf-vm.com/))
+1. Run the development application with
+```
+cargo tauri dev
 ```
 
 ## Building
@@ -35,9 +40,14 @@ npm run build
 
 You can preview the production build with `npm run preview`.
 
-> To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
+## Acknowledgements
 
-## TMDB Test data
+### ElasticVue
+
+The application architecture has taken lots of inspiration from the fantastic
+[ElasticVue](https://elasticvue.com/), particularly the use of tauri for the desktop app.
+
+### TMDB Test data
 
 This project uses test data obtained from the Relevant Search book repository (https://github.com/o19s/relevant-search-book). This was in turn sourced from TMDB.
 

@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import SearchResults from './SearchResults.svelte';
-	import { settings } from '$lib/settings';
-	import type { Settings } from '$lib/settings';
+	import { client } from '$lib/stores/client';
+	import { parseJson } from '$lib/helpers/json/parse';
 
 	enum SearchState {
 		Initial = 1,
@@ -10,24 +10,57 @@
 		Searched
 	}
 
-	let searchState = SearchState.Initial;
-	let localSettings: Settings;
+	export let handleSearchResults: (r: any) => void;
 
-	settings.subscribe((value: Settings) => {
-			localSettings = value;
-	});
+	let searchState = SearchState.Initial;
+
+	interface ValidationErrors {
+		indexName: any | null;
+		searchBody: any | null;
+		requestError: any | null;
+	}
+
+	let validationErrors: ValidationErrors = {
+		indexName: null,
+		searchBody: null,
+		requestError: null
+	};
+
+	async function handleOnSubmit(e: SubmitEvent) {
+		validationErrors = {
+			indexName: null,
+			searchBody: null,
+			requestError: null
+		};
+		const formData = new FormData(e.target);
+		const indexName = formData.get('indexName') as string;
+		const body = formData.get('searchBody') as string;
+		let parsedBody;
+		try {
+			parsedBody = parseJson(body);
+		} catch (err) {
+			validationErrors = {
+				...validationErrors,
+				searchBody: err
+			};
+			return;
+		}
+		const response = await $client.search(indexName, parsedBody);
+		const json = await response.json();
+		console.log(response);
+		if (!response.ok) {
+			validationErrors = {
+				...validationErrors,
+				requestError: json.error
+			};
+			console.log(validationErrors);
+			return;
+		}
+		handleSearchResults(json);
+	}
 </script>
 
-<form
-	method="POST"
-	use:enhance={({}) => {
-		searchState = SearchState.Searching;
-		return async ({ update }) => {
-			searchState = SearchState.Searched;
-			update();
-		};
-	}}
->
+<form on:submit|preventDefault={handleOnSubmit}>
 	<label class="label">
 		<span>Index name</span>
 		<input name="indexName" class="input" type="text" placeholder="Index name" required />
@@ -35,7 +68,14 @@
 	<label class="label">
 		<span>Query</span>
 		<textarea name="searchBody" class="textarea" placeholder="Search API body" required />
+		{#if validationErrors.searchBody}
+			<p class="text-xs italic text-red-500">{validationErrors.searchBody?.message}</p>
+		{/if}
 	</label>
-	<input type="hidden" name="elasticSearchUri" bind:value={localSettings.elasticSearchUri} />
-	<button class="btn variant-filled" type="submit">Search</button>
+	<button class="variant-filled btn" type="submit">Search</button>
+	{#if validationErrors.requestError}
+		<p class="text-xs italic text-red-500">
+			[{validationErrors.requestError?.type}] {validationErrors.requestError?.reason}
+		</p>
+	{/if}
 </form>

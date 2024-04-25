@@ -7,6 +7,8 @@ services:
     environment:
       - xpack.security.enabled=false
       - discovery.type=single-node
+      - http.cors.enabled=true
+      - http.cors.allow-origin=http://localhost:5173
     ulimits:
       memlock:
         soft: -1

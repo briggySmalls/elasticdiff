@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { settings } from '$lib/settings';
+	import { settings } from '$lib/stores/settings';
 
 	// Subscribe to the store to get the initial value.
 	let elasticSearchUri = $settings.elasticSearchUri;

@@ -19,6 +19,7 @@
 		"@skeletonlabs/skeleton": "^2.9.0",
 		"@skeletonlabs/tw-plugin": "^0.3.1",
 		"@sveltejs/adapter-auto": "^3.0.0",
+		"@sveltejs/adapter-static": "^3.0.1",
 		"@sveltejs/kit": "^2.0.0",
 		"@sveltejs/vite-plugin-svelte": "^3.0.0",
 		"@tailwindcss/forms": "^0.5.7",
@@ -46,8 +47,11 @@
 	"type": "module",
 	"dependencies": {
 		"@elastic/elasticsearch": "^7.17.13",
+		"@tauri-apps/api": "^1.5.3",
+		"@types/json-bigint": "^1.0.4",
 		"ag-grid-charts-enterprise": "^31.2.0",
 		"ag-grid-community": "^31.2.0",
-		"ag-grid-enterprise": "^31.2.0"
+		"ag-grid-enterprise": "^31.2.0",
+		"json-bigint": "^1.0.0"
 	}
 }
